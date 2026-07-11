@@ -4,7 +4,16 @@ import { about, start, help, links, creator, adminMenu } from './commands';
 import { greeting } from './text';
 import { development, production } from './core';
 
-import { checkPermission, SUPER_ADMIN_ID, addAdmin, removeAdmin, getAdminsList, AdminRole } from './core/adminManager';
+import { 
+  checkPermission, 
+  SUPER_ADMIN_ID, 
+  addAdmin, 
+  removeAdmin, 
+  getAdminsList, 
+  AdminRole, 
+  getTotalUsersCount, 
+  getMonthlyStatsReport 
+} from './core/adminManager';
 
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
 const ENVIRONMENT = process.env.NODE_ENV || '';
@@ -19,7 +28,8 @@ bot.command('creator', creator());
 // ==================== بخش مدیریت ادمین‌ها ====================
 
 bot.command('admin', async (ctx) => {
-  if (checkPermission(ctx.from.id)) {
+  const isAdmin = await checkPermission(ctx.from.id);
+  if (isAdmin) {
     await adminMenu()(ctx);
   } else {
     await ctx.reply('❌ شما دسترسی به این بخش را ندارید.');
@@ -44,7 +54,7 @@ bot.command('addadmin', async (ctx) => {
     return ctx.reply('❌ اطلاعات معتبر نیست. سطح دسترسی باید Full یا Support باشد.');
   }
 
-  const success = addAdmin(targetId, role, name);
+  const success = await addAdmin(targetId, role, name);
   if (success) {
     await ctx.reply(`✅ کاربر ${name} با موفقیت به عنوان ادمین (${role}) اضافه شد.`);
   } else {
@@ -76,7 +86,7 @@ bot.command('replyadmin', async (ctx) => {
     return ctx.reply('❌ سطح دسترسی نامعتبر است. باید Full یا Support باشد.');
   }
 
-  const success = addAdmin(targetId, role, targetName);
+  const success = await addAdmin(targetId, role, targetName);
   if (success) {
     await ctx.reply(`✅ کاربر ${targetName} با آیدی عددی (${targetId}) با موفقیت به عنوان ادمین (${role}) اضافه شد.`);
   } else {
@@ -96,7 +106,7 @@ bot.command('deladmin', async (ctx) => {
     return ctx.reply('❌ لطفاً یک آیدی عددی معتبر وارد کنید.');
   }
 
-  const success = removeAdmin(targetId);
+  const success = await removeAdmin(targetId);
   if (success) {
     await ctx.reply('✅ ادمین مورد نظر با موفقیت حذف شد.');
   } else {
@@ -108,7 +118,8 @@ bot.command('admins', async (ctx) => {
   if (Number(ctx.from.id) !== SUPER_ADMIN_ID) {
     return ctx.reply('❌ این دستور فقط مخصوص صاحب اصلی ربات است.');
   }
-  await ctx.reply(getAdminsList());
+  const list = await getAdminsList();
+  await ctx.reply(list);
 });
 
 // ==================== مدیریت اکشن دکمه‌های شیشه‌ای ====================
@@ -116,52 +127,40 @@ bot.command('admins', async (ctx) => {
 bot.action('btn_admin_menu', async (ctx) => {
   await ctx.answerCbQuery();
   const userId = ctx.from?.id || 0;
-  if (checkPermission(userId)) {
+  const isAdmin = await checkPermission(userId);
+  if (isAdmin) {
     await adminMenu()(ctx);
   } else {
     await ctx.reply('❌ شما دسترسی به این بخش را ندارید.');
   }
 });
 
-bot.action('btn_help', async (ctx) => {
-  await ctx.answerCbQuery();
-  await help()(ctx);
-});
+bot.action('btn_help', async (ctx) => { await ctx.answerCbQuery(); await help()(ctx); });
+bot.action('btn_start', async (ctx) => { await ctx.answerCbQuery(); await start()(ctx); });
+bot.action('btn_links', async (ctx) => { await ctx.answerCbQuery(); await links()(ctx); });
+bot.action('btn_about', async (ctx) => { await ctx.answerCbQuery(); await about()(ctx); });
+bot.action('btn_creator', async (ctx) => { await ctx.answerCbQuery(); await creator()(ctx); });
 
-bot.action('btn_start', async (ctx) => {
-  await ctx.answerCbQuery();
-  await start()(ctx);
-});
-
-bot.action('btn_links', async (ctx) => {
-  await ctx.answerCbQuery();
-  await links()(ctx);
-});
-
-bot.action('btn_about', async (ctx) => {
-  await ctx.answerCbQuery();
-  await about()(ctx);
-});
-
-bot.action('btn_creator', async (ctx) => {
-  await ctx.answerCbQuery();
-  await creator()(ctx);
-});
-
+// اکشن آمار کلی
 bot.action('btn_stats', async (ctx) => {
   await ctx.answerCbQuery();
-  await ctx.reply('📈 آمار ربات: تعداد کاربران فعلاً در نسخه حافظه موقت در دسترس نیست.');
+  const count = await getTotalUsersCount();
+  await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ${count} نفر`);
 });
 
-bot.action('btn_send_all', async (ctx) => {
+// اکشن آمار تفکیک شده ماهانه طبق تاریخ
+bot.action('btn_monthly_stats', async (ctx) => {
   await ctx.answerCbQuery();
-  await ctx.reply('📢 برای ارسال پیام همگانی، لطفاً طبق مستندات از دستور متنی آن استفاده کنید.');
+  const report = await getMonthlyStatsReport();
+  await ctx.replyWithMarkdown(report);
 });
 
+// اکشن لیست ادمین‌ها
 bot.action('btn_list_admins', async (ctx) => {
   await ctx.answerCbQuery();
   if (Number(ctx.from?.id) === SUPER_ADMIN_ID) {
-    await ctx.reply(getAdminsList());
+    const list = await getAdminsList();
+    await ctx.reply(list);
   } else {
     await ctx.reply('❌ این بخش فقط مخصوص صاحب اصلی ربات است.');
   }
@@ -171,7 +170,6 @@ bot.action('btn_list_admins', async (ctx) => {
 bot.on('message', greeting());
 
 // ==================== پیکربندی و اجرای سرورلس ====================
-
 export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
   await production(req, res, bot);
 };
