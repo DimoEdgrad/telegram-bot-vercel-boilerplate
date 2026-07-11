@@ -3,7 +3,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { start, help, adminMenu } from './commands'; 
 import { greeting } from './text';
 import { development } from './core';
-import { checkPermission, SUPER_ADMIN_ID, addAdmin, AdminRole } from './core/adminManager';
+import { checkPermission, SUPER_ADMIN_ID } from './core/adminManager';
 import { handleBan, handleMute, handleWarn } from './commands/moderation';
 
 const BOT_TOKEN = '252430934:AAFM9aXSCop4DZd8fMjcX85rNLFAlEAJp6c';
@@ -14,6 +14,7 @@ let groupLocks: { [chatId: number]: { links: boolean } } = {};
 
 bot.command('start', start());
 bot.command('help', help());
+bot.command('admin', async (ctx) => { if (await checkPermission(ctx.from.id)) await adminMenu()(ctx); });
 bot.command('ban', handleBan);
 bot.command('mute', handleMute);
 bot.command('warn', (ctx) => handleWarn(ctx, userWarns));
@@ -37,8 +38,8 @@ bot.on('message', async (ctx, next) => {
 
 export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
   if (req.method !== 'POST' || !req.body) return res.status(200).send('Bot is running...');
-  try { await bot.handleUpdate(req.body); } catch {}
-  res.status(200).send('OK');
+  try { await bot.handleUpdate(req.body); } catch (e) { console.error(e); }
+  if (!res.writableEnded) res.status(200).send('OK');
 };
 
 process.env.NODE_ENV !== 'production' && development(bot);
