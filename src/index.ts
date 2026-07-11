@@ -28,7 +28,7 @@ bot.action('btn_help', async (ctx) => {
 bot.action('btn_admin_menu', async (ctx) => {
   await ctx.answerCbQuery();
   // جهت امنیت بیشتر، اینجا هم چک میکنیم که حتما ادمین کلیک کرده باشد
-  const ADMIN_ID = 123456789; // 🛑 آیدی خودت را اینجا هم بذار
+  const ADMIN_ID = 186294875; // 🛑 آیدی خودت را اینجا هم بذار
   if (ctx.from?.id === ADMIN_ID) {
     await adminMenu()(ctx);
   } else {
