@@ -19,7 +19,7 @@ import {
 const BOT_TOKEN = '252430934:AAFM9aXSCop4DZd8fMjcX85rNLFAlEAJp6c';
 const ENVIRONMENT = process.env.NODE_ENV || '';
 
-// غیرفعال کردن هوک ریپلای پیش‌فرض تلگراف برای کنترل دستی و پایدار سرورلس
+// مدیریت بهینه اتصال دستی وب‌هوک برای کنترل دقیق سرورلس
 const bot = new Telegraf(BOT_TOKEN, {
   telegram: { webhookReply: false }
 });
@@ -32,11 +32,15 @@ bot.command('creator', creator());
 
 // ==================== بخش مدیریت ادمین‌ها ====================
 bot.command('admin', async (ctx) => {
-  const isAdmin = await checkPermission(ctx.from.id);
-  if (isAdmin) {
-    await adminMenu()(ctx);
-  } else {
-    await ctx.reply('❌ شما دسترسی به این بخش را ندارید.');
+  try {
+    const isAdmin = await checkPermission(ctx.from.id);
+    if (isAdmin) {
+      await adminMenu()(ctx);
+    } else {
+      await ctx.reply('❌ شما دسترسی به این بخش را ندارید.');
+    }
+  } catch (e) {
+    console.error(e);
   }
 });
 
@@ -58,11 +62,15 @@ bot.command('addadmin', async (ctx) => {
     return ctx.reply('❌ اطلاعات معتبر نیست. سطح دسترسی باید Full یا Support باشد.');
   }
 
-  const success = await addAdmin(targetId, role, name);
-  if (success) {
-    await ctx.reply(`✅ کاربر ${name} با موفقیت به عنوان ادمین (${role}) اضافه شد.`);
-  } else {
-    await ctx.reply('❌ این کاربر از قبل ادمین است یا آیدی اشتباه است.');
+  try {
+    const success = await addAdmin(targetId, role, name);
+    if (success) {
+      await ctx.reply(`✅ کاربر ${name} با موفقیت به عنوان ادمین (${role}) اضافه شد.`);
+    } else {
+      await ctx.reply('❌ این کاربر از قبل ادمین است یا آیدی اشتباه است.');
+    }
+  } catch (e) {
+    console.error(e);
   }
 });
 
@@ -90,11 +98,15 @@ bot.command('replyadmin', async (ctx) => {
     return ctx.reply('❌ سطح دسترسی نامعتبر است. باید Full یا Support باشد.');
   }
 
-  const success = await addAdmin(targetId, role, targetName);
-  if (success) {
-    await ctx.reply(`✅ کاربر ${targetName} با آیدی عددی (${targetId}) با موفقیت به عنوان ادمین (${role}) اضافه شد.`);
-  } else {
-    await ctx.reply('❌ این کاربر از قبل ادمین است یا مشکلی پیش آمده است.');
+  try {
+    const success = await addAdmin(targetId, role, targetName);
+    if (success) {
+      await ctx.reply(`✅ کاربر ${targetName} با آیدی عددی (${targetId}) با موفقیت به عنوان ادمین (${role}) اضافه شد.`);
+    } else {
+      await ctx.reply('❌ این کاربر از قبل ادمین است یا مشکلی پیش آمده است.');
+    }
+  } catch (e) {
+    console.error(e);
   }
 });
 
@@ -110,11 +122,15 @@ bot.command('deladmin', async (ctx) => {
     return ctx.reply('❌ لطفاً یک آیدی عددی معتبر وارد کنید.');
   }
 
-  const success = await removeAdmin(targetId);
-  if (success) {
-    await ctx.reply('✅ ادمین مورد نظر با موفقیت حذف شد.');
-  } else {
-    await ctx.reply('❌ ادمینی با این آیدی پیدا نشد.');
+  try {
+    const success = await removeAdmin(targetId);
+    if (success) {
+      await ctx.reply('✅ ادمین مورد نظر با موفقیت حذف شد.');
+    } else {
+      await ctx.reply('❌ ادمینی با این آیدی پیدا نشد.');
+    }
+  } catch (e) {
+    console.error(e);
   }
 });
 
@@ -122,8 +138,12 @@ bot.command('admins', async (ctx) => {
   if (Number(ctx.from.id) !== SUPER_ADMIN_ID) {
     return ctx.reply('❌ این دستور فقط مخصوص صاحب اصلی ربات است.');
   }
-  const list = await getAdminsList();
-  await ctx.reply(list);
+  try {
+    const list = await getAdminsList();
+    await ctx.reply(list);
+  } catch (e) {
+    console.error(e);
+  }
 });
 
 // ==================== مدیریت اکشن دکمه‌های شیشه‌ای ====================
@@ -148,12 +168,14 @@ bot.action('btn_links', async (ctx: any) => { await ctx.answerCbQuery().catch(()
 bot.action('btn_about', async (ctx: any) => { await ctx.answerCbQuery().catch(() => {}); await about()(ctx); });
 bot.action('btn_creator', async (ctx: any) => { await ctx.answerCbQuery().catch(() => {}); await creator()(ctx); });
 
+// --- اصلاح کلیدی دکمه‌های زیرمجموعه ادمین به صورت کامپکت و اتمیک ---
 bot.action('btn_stats', async (ctx: any) => {
   await ctx.answerCbQuery().catch(() => {});
   try {
     const count = await getTotalUsersCount();
     await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ${count} نفر`);
-  } catch {
+  } catch (err) {
+    console.error(err);
     await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ۱ نفر`);
   }
 });
@@ -163,7 +185,8 @@ bot.action('btn_monthly_stats', async (ctx: any) => {
   try {
     const report = await getMonthlyStatsReport();
     await ctx.replyWithMarkdown(report);
-  } catch {
+  } catch (err) {
+    console.error(err);
     await ctx.reply("❌ خطا در محاسبه آمار ماهانه.");
   }
 });
@@ -174,7 +197,8 @@ bot.action('btn_list_admins', async (ctx: any) => {
     try {
       const list = await getAdminsList();
       await ctx.reply(list);
-    } catch {
+    } catch (err) {
+      console.error(err);
       await ctx.reply("خطا در دریافت لیست.");
     }
   } else {
@@ -192,12 +216,12 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
   }
 
   try {
-    // تضمین اتمام کامل پردازش‌ها و تسک‌های دیتابیس پیش از بسته شدن تابع ورسل
+    // اجرای کامل فرآیند آپدیت‌ها و حل لایه‌ای پرامیس‌ها پیش از خروج
     await bot.handleUpdate(req.body);
   } catch (err) {
     console.error("Vercel Processing Error:", err);
   } finally {
-    // فقط و فقط زمانی پاسخ نهایی صادر می‌شود که پیام تلگرام ارسال و کار تمام شده باشد
+    // ارسال پاسخ نهایی فقط پس از پایان کامل تمام درخواست‌های تلگرام و دیتابیس
     if (!res.writableEnded) {
       res.status(200).send('OK');
     }
