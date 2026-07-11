@@ -126,7 +126,6 @@ bot.command('admins', async (ctx) => {
 bot.action('btn_admin_menu', async (ctx: any) => {
   ctx.answerCbQuery().catch(() => {});
   const userId = ctx.from?.id || 0;
-  
   try {
     const isAdmin = await checkPermission(userId);
     if (isAdmin) {
@@ -182,24 +181,21 @@ bot.action('btn_list_admins', async (ctx: any) => {
 // ==================== مدیریت پیام‌های عادی ====================
 bot.on('message', greeting());
 
-// ==================== پیکربندی سرورلس برای هماهنگی با دیتابیس ====================
+// ==================== موتور هندلر فوق‌سریع وب‌هوک ورسل ====================
 export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
+  // ۱. اعتبارسنجی اولیه درخواست
+  if (req.method !== 'POST' || !req.body || !req.body.update_id) {
+    return res.status(200).send('Bot is running...');
+  }
+
+  // ۲. ترفند اصلی: پاسخ آنی و آزاد کردن اتصال تلگرام بدون یک میلی‌ثانیه معطلی
+  res.status(200).end();
+
+  // ۳. اجرای امن و موازی کدهای ربات در پس‌زمینه بدون بلاک کردن کاربر
   try {
-    if (req.method !== 'POST' || !req.body || !req.body.update_id) {
-      return res.status(200).send('Bot is running...');
-    }
-
-    // منتظر می‌مانیم تا پردازش تلگرام و تسک‌های دیتابیس کاملا تمام شود
     await bot.handleUpdate(req.body);
-
-    // بعد از اتمام کامل تسک‌ها به ورسل اجازه پایان می‌دهیم
-    res.status(200).send('OK');
   } catch (err) {
-    console.error("Vercel Webhook Error:", err);
-    // در صورت بروز خطا هم پاسخ می‌دهیم تا درخواست مسدود نشود
-    if (!res.writableEnded) {
-      res.status(200).send('OK with error');
-    }
+    console.error("Background Webhook Processing Error:", err);
   }
 };
 
