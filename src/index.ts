@@ -30,7 +30,7 @@ bot.command('admin', async (ctx) => {
 
 // اضافه کردن ادمین جدید (فقط صاحب اصلی ربات)
 bot.command('addadmin', async (ctx) => {
-  if (ctx.from.id !== SUPER_ADMIN_ID) {
+  if (ctx.from.id !== 186294875) {
     return ctx.reply('❌ این دستور فقط مخصوص صاحب اصلی ربات است.');
   }
   
@@ -57,7 +57,7 @@ bot.command('addadmin', async (ctx) => {
 
 // حذف ادمین (فقط صاحب اصلی ربات)
 bot.command('deladmin', async (ctx) => {
-  if (ctx.from.id !== SUPER_ADMIN_ID) {
+  if (ctx.from.id !== 186294875) {
     return ctx.reply('❌ این دستور فقط مخصوص صاحب اصلی ربات است.');
   }
   
@@ -78,7 +78,7 @@ bot.command('deladmin', async (ctx) => {
 
 // مشاهده لیست ادمین‌ها با دستور متنی (فقط صاحب اصلی ربات)
 bot.command('admins', async (ctx) => {
-  if (ctx.from.id !== SUPER_ADMIN_ID) {
+  if (ctx.from.id !== 186294875) {
     return ctx.reply('❌ این دستور فقط مخصوص صاحب اصلی ربات است.');
   }
   await ctx.reply(getAdminsList());
@@ -138,10 +138,10 @@ bot.action('btn_send_all', async (ctx) => {
   await ctx.reply('📢 برای ارسال پیام همگانی، لطفاً طبق مستندات از دستور متنی آن استفاده کنید.');
 });
 
-// کلیک روی دکمه لیست ادمین‌ها در پنل مدیریت
+// کلیک روی دکمه لیست ادمین‌ها در پنل مدیریت (اصلاح شده با آیدی تو)
 bot.action('btn_list_admins', async (ctx) => {
   await ctx.answerCbQuery();
-  if (ctx.from?.id === SUPER_ADMIN_ID) {
+  if (ctx.from?.id === 186294875) {
     await ctx.reply(getAdminsList());
   } else {
     await ctx.reply('❌ این بخش فقط مخصوص صاحب اصلی ربات است.');
