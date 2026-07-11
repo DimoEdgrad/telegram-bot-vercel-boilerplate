@@ -1,4 +1,4 @@
-// صاحب اصلی و تغییرناپذیر ربات (آیدی شما)
+// صاحب اصلی و تغییرناپذیر ربات (آیدی دقیق شما)
 export const SUPER_ADMIN_ID = 186294875;
 
 export type AdminRole = 'Full' | 'Support';
@@ -12,22 +12,25 @@ interface Admin {
 // لیست ادمین‌های فرعی در حافظه موقت
 let tempAdmins: Admin[] = [];
 
-// تابع بررسی دسترسی (اصلاح شده)
-export const checkPermission = (userId: number): boolean => {
-  if (userId === SUPER_ADMIN_ID) return true;
-  return tempAdmins.some(admin => admin.id === userId);
+// تابع بررسی دسترسی با تبدیل قطعی به عدد
+export const checkPermission = (userId: any): boolean => {
+  const numericId = Number(userId);
+  if (numericId === SUPER_ADMIN_ID) return true;
+  return tempAdmins.some(admin => admin.id === numericId);
 };
 
 // تابع اضافه کردن ادمین جدید
 export const addAdmin = (id: number, role: AdminRole, name: string): boolean => {
-  if (tempAdmins.some(a => a.id === id) || id === SUPER_ADMIN_ID) return false;
-  tempAdmins.push({ id, role, name });
+  const numericId = Number(id);
+  if (tempAdmins.some(a => a.id === numericId) || numericId === SUPER_ADMIN_ID) return false;
+  tempAdmins.push({ id: numericId, role, name });
   return true;
 };
 
 // تابع حذف ادمین
 export const removeAdmin = (id: number): boolean => {
-  const index = tempAdmins.findIndex(a => a.id === id);
+  const numericId = Number(id);
+  const index = tempAdmins.findIndex(a => a.id === numericId);
   if (index === -1) return false;
   tempAdmins.splice(index, 1);
   return true;
