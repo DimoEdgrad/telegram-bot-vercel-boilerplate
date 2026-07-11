@@ -6,7 +6,7 @@ export const links = () => async (ctx: Context) => {
     Markup.inlineKeyboard([
       [
         Markup.button.url('گیت‌هاب پروژه', 'https://github.com/DimoEdgrad/telegram-bot-vercel-boilerplate'),
-        Markup.button.url('کانال تلگرام', 'https://t.me/YourChannel')
+        Markup.button.url('کانال تلگرام', 'https://t.me/TheGhostButterfly')
       ],
       [
         Markup.button.callback('ℹ️ درباره پروژه', 'btn_about'),
