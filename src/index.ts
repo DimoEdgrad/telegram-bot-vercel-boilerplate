@@ -15,7 +15,8 @@ import {
   getMonthlyStatsReport 
 } from './core/adminManager';
 
-const BOT_TOKEN = process.env.BOT_TOKEN || '';
+// توکن اختصاصی شما به صورت هاردکد شده برای اطمینان از صحت عملکرد
+const BOT_TOKEN = '252430934:AAFM9aXSCop4DZd8fMjcX85rNLFAlEAJp6c';
 const ENVIRONMENT = process.env.NODE_ENV || '';
 const bot = new Telegraf(BOT_TOKEN);
 
