@@ -8,11 +8,7 @@ export const help = () => async (ctx: Context) => {
     Markup.inlineKeyboard([
       [
         Markup.button.callback('🚀 شروع مجدد', 'btn_start'),
-        Markup.button.callback('ℹ️ درباره پروژه', 'btn_about')
-      ],
-      [
-        Markup.button.callback('🌐 لینک‌های مفید', 'btn_links'),
-        Markup.button.callback('👤 ارتباط با سازنده', 'btn_creator')
+        Markup.button.callback('🌐 لینک‌ها و اطلاعات', 'btn_links') // تغییر نام برای شمول بیشتر
       ]
     ])
   );
