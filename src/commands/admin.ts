@@ -14,24 +14,19 @@ export const adminMenu = () => async (ctx: Context) => {
     adminText += 
       `👑 بخش صاحب اصلی ربات (مدیریت دسترسی‌ها):\n\n` +
       `🔹 روش اول: افزودن با آیدی عددی\n` +
-      `دستور را به همراه آیدی، سطح (Full یا Support) و نام بفرستید:\n` +
-      `/addadmin [آیدی] [سطح] [نام]\n` +
-      `👉 مثال: /addadmin 186294875 Full Ali\n\n` +
+      `/addadmin [آیدی] [سطح] [نام]\n\n` +
       `🔹 روش دوم: افزودن هوشمند (بدون نیاز به آیدی)\n` +
-      `۱. پیام کاربر مورد نظر را به ربات فوروارد کنید.\n` +
-      `۲. روی پیام فوروارد شده ریپلای کنید و دستور زیر را بفرستید:\n` +
-      `/replyadmin [سطح]\n` +
-      `👉 مثال: /replyadmin Support\n\n` +
+      `پیام کاربر را فوروارد کنید، روش ریپلای کنید و بفرستید:\n` +
+      `/replyadmin [سطح]\n\n` +
       `❌ حذف ادمین فرعی:\n` +
-      `/deladmin [آیدی عددی]\n` +
-      `👉 مثال: /deladmin 987654321\n\n` +
-      `📋 برای دیدن لیست ادمین‌های فعلی روی دکمه زیر کلیک کنید.`;
+      `/deladmin [آیدی عددی]\n\n` +
+      `📋 برای دیدن لیست ادمین‌ها روی دکمه زیر کلیک کنید.`;
   }
 
   const buttons = [
     [
-      Markup.button.callback('📊 آمار ربات', 'btn_stats'),
-      Markup.button.callback('📢 ارسال همگانی', 'btn_send_all')
+      Markup.button.callback('📊 آمار کلی کاربران', 'btn_stats'),
+      Markup.button.callback('📅 آمار تفکیک‌شده ماهانه', 'btn_monthly_stats')
     ]
   ];
 
