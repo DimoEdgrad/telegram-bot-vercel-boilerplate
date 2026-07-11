@@ -18,7 +18,11 @@ import {
 // توکن اختصاصی شما
 const BOT_TOKEN = '252430934:AAFM9aXSCop4DZd8fMjcX85rNLFAlEAJp6c';
 const ENVIRONMENT = process.env.NODE_ENV || '';
-const bot = new Telegraf(BOT_TOKEN);
+
+// غیرفعال کردن هوک ریپلای پیش‌فرض تلگراف برای کنترل دستی و پایدار سرورلس
+const bot = new Telegraf(BOT_TOKEN, {
+  telegram: { webhookReply: false }
+});
 
 // ==================== دستورات متنی عمومی ====================
 bot.command('start', start()); 
@@ -124,7 +128,7 @@ bot.command('admins', async (ctx) => {
 
 // ==================== مدیریت اکشن دکمه‌های شیشه‌ای ====================
 bot.action('btn_admin_menu', async (ctx: any) => {
-  ctx.answerCbQuery().catch(() => {});
+  await ctx.answerCbQuery().catch(() => {});
   const userId = ctx.from?.id || 0;
   try {
     const isAdmin = await checkPermission(userId);
@@ -138,14 +142,14 @@ bot.action('btn_admin_menu', async (ctx: any) => {
   }
 });
 
-bot.action('btn_help', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await help()(ctx); });
-bot.action('btn_start', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await start()(ctx); });
-bot.action('btn_links', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await links()(ctx); });
-bot.action('btn_about', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await about()(ctx); });
-bot.action('btn_creator', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await creator()(ctx); });
+bot.action('btn_help', async (ctx: any) => { await ctx.answerCbQuery().catch(() => {}); await help()(ctx); });
+bot.action('btn_start', async (ctx: any) => { await ctx.answerCbQuery().catch(() => {}); await start()(ctx); });
+bot.action('btn_links', async (ctx: any) => { await ctx.answerCbQuery().catch(() => {}); await links()(ctx); });
+bot.action('btn_about', async (ctx: any) => { await ctx.answerCbQuery().catch(() => {}); await about()(ctx); });
+bot.action('btn_creator', async (ctx: any) => { await ctx.answerCbQuery().catch(() => {}); await creator()(ctx); });
 
 bot.action('btn_stats', async (ctx: any) => {
-  ctx.answerCbQuery().catch(() => {});
+  await ctx.answerCbQuery().catch(() => {});
   try {
     const count = await getTotalUsersCount();
     await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ${count} نفر`);
@@ -155,7 +159,7 @@ bot.action('btn_stats', async (ctx: any) => {
 });
 
 bot.action('btn_monthly_stats', async (ctx: any) => {
-  ctx.answerCbQuery().catch(() => {});
+  await ctx.answerCbQuery().catch(() => {});
   try {
     const report = await getMonthlyStatsReport();
     await ctx.replyWithMarkdown(report);
@@ -165,7 +169,7 @@ bot.action('btn_monthly_stats', async (ctx: any) => {
 });
 
 bot.action('btn_list_admins', async (ctx: any) => {
-  ctx.answerCbQuery().catch(() => {});
+  await ctx.answerCbQuery().catch(() => {});
   if (Number(ctx.from?.id) === SUPER_ADMIN_ID) {
     try {
       const list = await getAdminsList();
@@ -181,21 +185,22 @@ bot.action('btn_list_admins', async (ctx: any) => {
 // ==================== مدیریت پیام‌های عادی ====================
 bot.on('message', greeting());
 
-// ==================== موتور هندلر فوق‌سریع وب‌هوک ورسل ====================
+// ==================== هندلر استاندارد و کاملاً پایدار سرورلس ورسل ====================
 export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
-  // ۱. اعتبارسنجی اولیه درخواست
   if (req.method !== 'POST' || !req.body || !req.body.update_id) {
     return res.status(200).send('Bot is running...');
   }
 
-  // ۲. ترفند اصلی: پاسخ آنی و آزاد کردن اتصال تلگرام بدون یک میلی‌ثانیه معطلی
-  res.status(200).end();
-
-  // ۳. اجرای امن و موازی کدهای ربات در پس‌زمینه بدون بلاک کردن کاربر
   try {
+    // تضمین اتمام کامل پردازش‌ها و تسک‌های دیتابیس پیش از بسته شدن تابع ورسل
     await bot.handleUpdate(req.body);
   } catch (err) {
-    console.error("Background Webhook Processing Error:", err);
+    console.error("Vercel Processing Error:", err);
+  } finally {
+    // فقط و فقط زمانی پاسخ نهایی صادر می‌شود که پیام تلگرام ارسال و کار تمام شده باشد
+    if (!res.writableEnded) {
+      res.status(200).send('OK');
+    }
   }
 };
 
