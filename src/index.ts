@@ -1,6 +1,6 @@
 import { Telegraf } from 'telegraf';
 
-// ۱. وارد کردن تمام دستورات جدید
+// وارد کردن دستورات
 import { about, start, help, links, creator } from './commands'; 
 import { greeting } from './text';
 import { VercelRequest, VercelResponse } from '@vercel/node';
@@ -11,12 +11,34 @@ const ENVIRONMENT = process.env.NODE_ENV || '';
 
 const bot = new Telegraf(BOT_TOKEN);
 
-// ۲. متصل کردن دستورات به ربات
+// ۱. متصل کردن دستورات متنی (وقتی کاربر دستور را تایپ می‌کند)
 bot.command('start', start()); 
 bot.command('help', help());
 bot.command('about', about());
 bot.command('links', links());
 bot.command('creator', creator());
+
+// ۲. مدیریت کلیک روی دکمه‌های شیشه‌ای منوی Help
+bot.action('btn_start', async (ctx) => {
+  await ctx.answerCbQuery(); // حذف حالت لودینگ دکمه در تلگرام
+  await start()(ctx);       // اجرای تابع start
+});
+
+bot.action('btn_about', async (ctx) => {
+  await ctx.answerCbQuery();
+  await about()(ctx);       // اجرای تابع about
+});
+
+bot.action('btn_links', async (ctx) => {
+  await ctx.answerCbQuery();
+  await links()(ctx);       // اجرای تابع links
+});
+
+bot.action('btn_creator', async (ctx) => {
+  await ctx.answerCbQuery();
+  await creator()(ctx);     // اجرای تابع creator
+});
+
 
 bot.on('message', greeting());
 
