@@ -26,9 +26,8 @@ bot.command('admin', async (ctx) => {
   }
 });
 
-// ۱. اضافه کردن ادمین با آیدی عددی (روش قبلی)
 bot.command('addadmin', async (ctx) => {
-  if (ctx.from.id !== SUPER_ADMIN_ID) {
+  if (Number(ctx.from.id) !== SUPER_ADMIN_ID) {
     return ctx.reply('❌ این دستور فقط مخصوص صاحب اصلی ربات است.');
   }
   
@@ -53,29 +52,25 @@ bot.command('addadmin', async (ctx) => {
   }
 });
 
-// ۲. قابلیت جدید: اضافه کردن ادمین از طریق ریپلای روی پیام فوروارد شده
 bot.command('replyadmin', async (ctx) => {
-  if (ctx.from.id !== SUPER_ADMIN_ID) {
+  if (Number(ctx.from.id) !== SUPER_ADMIN_ID) {
     return ctx.reply('❌ این دستور فقط مخصوص صاحب اصلی ربات است.');
   }
 
-  // بررسی اینکه آیا دستور روی یک پیام ریپلای شده است یا خیر
   const replyToMessage = (ctx.message as any).reply_to_message;
   if (!replyToMessage) {
     return ctx.reply('❌ لطفا این دستور را با ریپلای روی پیام فوروارد شده کاربر ارسال کنید.');
   }
 
-  // پیدا کردن آیدی عددی از پیام فوروارد شده یا پیام معمولی
   const targetId = replyToMessage.forward_from?.id || replyToMessage.from?.id;
   const targetName = replyToMessage.forward_from?.first_name || replyToMessage.from?.first_name || 'کاربر جدید';
 
   if (!targetId) {
-    return ctx.reply('❌ نتوانستم آیدی عددی کاربر را از این پیام استخراج کنم (احتمالاً تنظیمات حریم خصوصی فوروارد کاربر بسته است).');
+    return ctx.reply('❌ نتوانستم آیدی عددی کاربر را استخراج کنم.');
   }
 
-  // گرفتن سطح دسترسی از متن دستور (مثلا: /replyadmin Full)
   const args = ctx.message.text.split(' ').slice(1);
-  const role = (args[0] as AdminRole) || 'Support'; // اگر مشخص نشود، پیش‌فرض Support می‌شود
+  const role = (args[0] as AdminRole) || 'Support';
 
   if (role !== 'Full' && role !== 'Support') {
     return ctx.reply('❌ سطح دسترسی نامعتبر است. باید Full یا Support باشد.');
@@ -89,9 +84,8 @@ bot.command('replyadmin', async (ctx) => {
   }
 });
 
-// حذف ادمین
 bot.command('deladmin', async (ctx) => {
-  if (ctx.from.id !== SUPER_ADMIN_ID) {
+  if (Number(ctx.from.id) !== SUPER_ADMIN_ID) {
     return ctx.reply('❌ این دستور فقط مخصوص صاحب اصلی ربات است.');
   }
   
@@ -111,7 +105,7 @@ bot.command('deladmin', async (ctx) => {
 });
 
 bot.command('admins', async (ctx) => {
-  if (ctx.from.id !== SUPER_ADMIN_ID) {
+  if (Number(ctx.from.id) !== SUPER_ADMIN_ID) {
     return ctx.reply('❌ این دستور فقط مخصوص صاحب اصلی ربات است.');
   }
   await ctx.reply(getAdminsList());
@@ -166,7 +160,7 @@ bot.action('btn_send_all', async (ctx) => {
 
 bot.action('btn_list_admins', async (ctx) => {
   await ctx.answerCbQuery();
-  if (ctx.from?.id === SUPER_ADMIN_ID) {
+  if (Number(ctx.from?.id) === SUPER_ADMIN_ID) {
     await ctx.reply(getAdminsList());
   } else {
     await ctx.reply('❌ این بخش فقط مخصوص صاحب اصلی ربات است.');
