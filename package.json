@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "admin id @dimoedgard",
   "main": "src/index.ts",
-  "author": "Dimo Edgard (https://t.me/dimoedgard)",
+  "author": "my owner is: Dimo Edgard (https://t.me/dimoedgard)",
   "homepage": "https://t.me/dimoedgard",
   "dependencies": {
     "@vercel/node": "^5.1.16",
