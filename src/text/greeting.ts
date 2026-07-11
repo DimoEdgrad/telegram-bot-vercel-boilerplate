@@ -1,41 +1,22 @@
-import { Telegraf } from 'telegraf';
-import { greeting } from './text';
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import { development, production } from './core';
+import { Context } from 'telegraf';
+import createDebug from 'debug';
 
-const BOT_TOKEN = process.env.BOT_TOKEN || '';
-const ENVIRONMENT = process.env.NODE_ENV || '';
+const debug = createDebug('bot:greeting_text');
 
-const bot = new Telegraf(BOT_TOKEN);
+const replyToMessage = (ctx: Context, messageId: number, string: string) =>
+  ctx.reply(string, {
+    reply_parameters: { message_id: messageId },
+  });
 
-// اجرای تابع گریپینگ روی پیام‌های متنی ورودی
-bot.on('text', greeting());
+const greeting = () => async (ctx: Context) => {
+  debug('Triggered "greeting" text command');
 
-// پردازش کلیک روی دکمه شیشه‌ای لیست دستورات
-bot.action('show_commands', async (ctx) => {
-  try {
-    await ctx.answerCbQuery(); // حذف حالت لودینگ دکمه
-    await ctx.reply(
-      '📜 لیست دستورات فعال ربات:\n\n' +
-      '🔹 /start - شروع مجدد ربات\n' +
-      '🔹 /help - راهنمای استفاده از ربات\n' +
-      '🔹 /about - درباره ما'
-    );
-  } catch (error) {
-    console.error('Error handling callback query:', error);
-  }
-});
+  const messageId = ctx.message?.message_id;
+  const userName = `${ctx.message?.from.first_name} ${ctx.message?.from.last_name}`;
 
-// هسته مدیریت سرورلس برای Vercel
-export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
-  if (ENVIRONMENT === 'production') {
-    await production(req, res, bot);
-  } else {
-    await development(bot);
+  if (messageId) {
+    await replyToMessage(ctx, messageId, `Hello, ${userName}!`);
   }
 };
 
-// اجرای محلی (Local) در صورت نیاز
-if (ENVIRONMENT !== 'production') {
-  development(bot);
-}
+export { greeting };
