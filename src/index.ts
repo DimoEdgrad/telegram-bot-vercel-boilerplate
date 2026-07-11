@@ -15,7 +15,7 @@ import {
   getMonthlyStatsReport 
 } from './core/adminManager';
 
-// توکن اختصاصی شما به صورت هاردکد شده برای اطمینان از صحت عملکرد
+// توکن اختصاصی شما
 const BOT_TOKEN = '252430934:AAFM9aXSCop4DZd8fMjcX85rNLFAlEAJp6c';
 const ENVIRONMENT = process.env.NODE_ENV || '';
 const bot = new Telegraf(BOT_TOKEN);
@@ -163,37 +163,4 @@ bot.action('btn_monthly_stats', async (ctx: any) => {
 bot.action('btn_list_admins', async (ctx: any) => {
   ctx.answerCbQuery().catch(() => {});
   if (Number(ctx.from?.id) === SUPER_ADMIN_ID) {
-    getAdminsList()
-      .then(async (list) => {
-        await ctx.reply(list);
-      })
-      .catch(async () => await ctx.reply("خطا در دریافت لیست."));
-  } else {
-    await ctx.reply('❌ این بخش فقط مخصوص صاحب اصلی ربات است.');
-  }
-});
-
-// ==================== مدیریت پیام‌های عادی ====================
-bot.on('message', greeting());
-
-// ==================== پیکربندی و اجرای سرورلس با پاسخ فوری و ایمن ====================
-export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
-  try {
-    if (req.method !== 'POST' || !req.body || !req.body.update_id) {
-      if (res && typeof res.status === 'function') {
-        return res.status(200).send('Bot is running...');
-      }
-      return;
-    }
-
-    if (res && typeof res.status === 'function') {
-      res.status(200).send('OK');
-    }
-
-    await bot.handleUpdate(req.body);
-  } catch (err) {
-    console.error("Vercel Webhook Error:", err);
-  }
-};
-
-ENVIRONMENT !== 'production' && development(bot);
+    getAd
