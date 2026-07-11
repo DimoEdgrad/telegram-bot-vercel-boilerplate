@@ -1,7 +1,7 @@
 import { Context, Markup } from 'telegraf';
 
 // 🛑 آیدی عددی تلگرام خودت را جایگزین 123456789 کن
-const ADMIN_ID = 123456789; 
+const ADMIN_ID = 186294875; 
 
 export const start = () => async (ctx: Context) => {
   const firstName = ctx.from?.first_name || 'کاربر گرامی';
