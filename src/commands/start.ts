@@ -1,7 +1,8 @@
 import { Context } from 'telegraf';
 
-const start = () => async (ctx: Context) => {
-  await ctx.reply('سلام! به ربات تلگرام من خوش آمدید. 🚀');
+export const start = () => async (ctx: Context) => {
+  const firstName = ctx.from?.first_name || 'کاربر گرامی';
+  await ctx.replyWithMarkdownV2(
+    `سلام *${firstName}* عزیز\\! 🚀\nبه ربات پیشرفته من خوش آمدید\\.\n\nبرای دیدن لیست کارهای من، دستور /help را ارسال کنید\\.`
+  );
 };
-
-export { start };
