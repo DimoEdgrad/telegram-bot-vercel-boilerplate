@@ -127,13 +127,16 @@ bot.action('btn_admin_menu', async (ctx: any) => {
   ctx.answerCbQuery().catch(() => {});
   const userId = ctx.from?.id || 0;
   
-  checkPermission(userId).then(async (isAdmin) => {
+  try {
+    const isAdmin = await checkPermission(userId);
     if (isAdmin) {
       await adminMenu()(ctx);
     } else {
       await ctx.reply('❌ شما دسترسی به این بخش را ندارید.');
     }
-  }).catch(e => console.error(e));
+  } catch (e) {
+    console.error(e);
+  }
 });
 
 bot.action('btn_help', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await help()(ctx); });
@@ -144,23 +147,60 @@ bot.action('btn_creator', async (ctx: any) => { ctx.answerCbQuery().catch(() => 
 
 bot.action('btn_stats', async (ctx: any) => {
   ctx.answerCbQuery().catch(() => {});
-  getTotalUsersCount()
-    .then(async (count) => {
-      await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ${count} نفر`);
-    })
-    .catch(async () => await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ۱ نفر`));
+  try {
+    const count = await getTotalUsersCount();
+    await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ${count} نفر`);
+  } catch {
+    await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ۱ نفر`);
+  }
 });
 
 bot.action('btn_monthly_stats', async (ctx: any) => {
   ctx.answerCbQuery().catch(() => {});
-  getMonthlyStatsReport()
-    .then(async (report) => {
-      await ctx.replyWithMarkdown(report);
-    })
-    .catch(async () => await ctx.reply("❌ خطا در محاسبه آمار ماهانه."));
+  try {
+    const report = await getMonthlyStatsReport();
+    await ctx.replyWithMarkdown(report);
+  } catch {
+    await ctx.reply("❌ خطا در محاسبه آمار ماهانه.");
+  }
 });
 
 bot.action('btn_list_admins', async (ctx: any) => {
   ctx.answerCbQuery().catch(() => {});
   if (Number(ctx.from?.id) === SUPER_ADMIN_ID) {
-    getAd
+    try {
+      const list = await getAdminsList();
+      await ctx.reply(list);
+    } catch {
+      await ctx.reply("خطا در دریافت لیست.");
+    }
+  } else {
+    await ctx.reply('❌ این بخش فقط مخصوص صاحب اصلی ربات است.');
+  }
+});
+
+// ==================== مدیریت پیام‌های عادی ====================
+bot.on('message', greeting());
+
+// ==================== پیکربندی سرورلس برای هماهنگی با دیتابیس ====================
+export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
+  try {
+    if (req.method !== 'POST' || !req.body || !req.body.update_id) {
+      return res.status(200).send('Bot is running...');
+    }
+
+    // منتظر می‌مانیم تا پردازش تلگرام و تسک‌های دیتابیس کاملا تمام شود
+    await bot.handleUpdate(req.body);
+
+    // بعد از اتمام کامل تسک‌ها به ورسل اجازه پایان می‌دهیم
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error("Vercel Webhook Error:", err);
+    // در صورت بروز خطا هم پاسخ می‌دهیم تا درخواست مسدود نشود
+    if (!res.writableEnded) {
+      res.status(200).send('OK with error');
+    }
+  }
+};
+
+ENVIRONMENT !== 'production' && development(bot);
