@@ -1,7 +1,6 @@
-// صاحب اصلی و تغییرناپذیر ربات (فقط شما)
+// صاحب اصلی و تغییرناپذیر ربات (آیدی شما)
 export const SUPER_ADMIN_ID = 186294875;
 
-// تعریف سطوح دسترسی
 export type AdminRole = 'Full' | 'Support';
 
 interface Admin {
@@ -10,22 +9,13 @@ interface Admin {
   name: string;
 }
 
-// لیست ادمین‌های فرعی در حافظه موقت (با ریست شدن سرورلس پاک می‌شود)
-// اگر می‌خواهید دائمی باشد بعدا باید به دیتابیس وصل شود، فعلا برای تست دستی اینجا آرایه داریم:
-let tempAdmins: Admin[] = [
-  // { id: 987654321, role: 'Support', name: 'علی' }
-];
+// لیست ادمین‌های فرعی در حافظه موقت
+let tempAdmins: Admin[] = [];
 
-// تابع بررسی دسترسی
-export const checkPermission = (userId: number, requiredRole?: AdminRole): boolean => {
-  if (userId === SUPER_ADMIN_ID) return true; // صاحب اصلی به همه چیز دسترسی دارد
-  
-  const admin = tempAdmins.find(a => a.id === userId);
-  if (!admin) return false;
-
-  if (!requiredRole) return true; // فقط ادمین بودن کافی است
-  if (admin.role === 'Full') return true; // سطح Full به همه چیز دسترسی دارد
-  return admin.role === requiredRole; // بررسی سطح دسترسی دقیق
+// تابع بررسی دسترسی (اصلاح شده)
+export const checkPermission = (userId: number): boolean => {
+  if (userId === SUPER_ADMIN_ID) return true;
+  return tempAdmins.some(admin => admin.id === userId);
 };
 
 // تابع اضافه کردن ادمین جدید
