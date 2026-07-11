@@ -7,12 +7,12 @@ export const start = () => async (ctx: Context) => {
 
   const welcomeText = `سلام ${firstName} عزیز! 🚀\nبه ربات پیشرفته من خوش آمدید.`;
   
-  // دکمه عمومی
+  // دکمه‌های شیشه‌ای منوی استارت
   const buttons = [
     [Markup.button.callback('📜 راهنمای ربات', 'btn_help')]
   ];
 
-  // اگر کاربر ادمین یا صاحب ربات بود، دکمه شیشه‌ای ادمین اضافه می‌شود
+  // نمایش دکمه در صورت داشتن دسترسی مدیریت
   if (checkPermission(userId)) {
     buttons.push([Markup.button.callback('🛠️ لیست کامل دستورات ادمین', 'btn_admin_menu')]);
   }
