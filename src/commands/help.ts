@@ -1,13 +1,19 @@
-import { Context } from 'telegraf';
+import { Context, Markup } from 'telegraf';
 
 export const help = () => async (ctx: Context) => {
-  const helpText = 
-    `📜 راهنمای دستورات ربات:\n\n` +
-    `🔹 /start - شروع مجدد ربات\n` +
-    `🔹 /help - نمایش همین راهنما\n` +
-    `🔹 /about - درباره این پروژه\n` +
-    `🔹 /links - لینک‌های مفید و شبکه‌های اجتماعی\n` +
-    `🔹 /creator - ارتباط با سازنده ربات`;
+  const helpText = '📜 لطفا یکی از بخش‌های راهنما را از منوی زیر انتخاب کنید:';
   
-  await ctx.reply(helpText);
+  await ctx.reply(
+    helpText,
+    Markup.inlineKeyboard([
+      [
+        Markup.button.callback('🚀 شروع مجدد', 'btn_start'),
+        Markup.button.callback('ℹ️ درباره پروژه', 'btn_about')
+      ],
+      [
+        Markup.button.callback('🌐 لینک‌های مفید', 'btn_links'),
+        Markup.button.callback('👤 ارتباط با سازنده', 'btn_creator')
+      ]
+    ])
+  );
 };
