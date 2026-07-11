@@ -15,7 +15,8 @@ import {
   getMonthlyStatsReport 
 } from './core/adminManager';
 
-const BOT_TOKEN = process.env.BOT_TOKEN || '';
+// توکن اختصاصی شما به صورت هاردکد شده برای اطمینان از صحت عملکرد
+const BOT_TOKEN = '252430934:AAFM9aXSCop4DZd8fMjcX85rNLFAlEAJp6c';
 const ENVIRONMENT = process.env.NODE_ENV || '';
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -26,7 +27,6 @@ bot.command('links', links());
 bot.command('creator', creator());
 
 // ==================== بخش مدیریت ادمین‌ها ====================
-
 bot.command('admin', async (ctx) => {
   const isAdmin = await checkPermission(ctx.from.id);
   if (isAdmin) {
@@ -123,9 +123,8 @@ bot.command('admins', async (ctx) => {
 });
 
 // ==================== مدیریت اکشن دکمه‌های شیشه‌ای ====================
-
 bot.action('btn_admin_menu', async (ctx: any) => {
-  await ctx.answerCbQuery();
+  ctx.answerCbQuery().catch(() => {});
   const userId = ctx.from?.id || 0;
   
   checkPermission(userId).then(async (isAdmin) => {
@@ -137,23 +136,23 @@ bot.action('btn_admin_menu', async (ctx: any) => {
   }).catch(e => console.error(e));
 });
 
-bot.action('btn_help', async (ctx: any) => { await ctx.answerCbQuery(); await help()(ctx); });
-bot.action('btn_start', async (ctx: any) => { await ctx.answerCbQuery(); await start()(ctx); });
-bot.action('btn_links', async (ctx: any) => { await ctx.answerCbQuery(); await links()(ctx); });
-bot.action('btn_about', async (ctx: any) => { await ctx.answerCbQuery(); await about()(ctx); });
-bot.action('btn_creator', async (ctx: any) => { await ctx.answerCbQuery(); await creator()(ctx); });
+bot.action('btn_help', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await help()(ctx); });
+bot.action('btn_start', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await start()(ctx); });
+bot.action('btn_links', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await links()(ctx); });
+bot.action('btn_about', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await about()(ctx); });
+bot.action('btn_creator', async (ctx: any) => { ctx.answerCbQuery().catch(() => {}); await creator()(ctx); });
 
 bot.action('btn_stats', async (ctx: any) => {
-  await ctx.answerCbQuery();
+  ctx.answerCbQuery().catch(() => {});
   getTotalUsersCount()
     .then(async (count) => {
       await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ${count} نفر`);
     })
-    .catch(async () => await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: 1 نفر`));
+    .catch(async () => await ctx.reply(`📈 *آمار کلی ربات:*\n\n👥 تعداد کل کاربران عضو شده: ۱ نفر`));
 });
 
 bot.action('btn_monthly_stats', async (ctx: any) => {
-  await ctx.answerCbQuery();
+  ctx.answerCbQuery().catch(() => {});
   getMonthlyStatsReport()
     .then(async (report) => {
       await ctx.replyWithMarkdown(report);
@@ -162,7 +161,7 @@ bot.action('btn_monthly_stats', async (ctx: any) => {
 });
 
 bot.action('btn_list_admins', async (ctx: any) => {
-  await ctx.answerCbQuery();
+  ctx.answerCbQuery().catch(() => {});
   if (Number(ctx.from?.id) === SUPER_ADMIN_ID) {
     getAdminsList()
       .then(async (list) => {
@@ -177,9 +176,24 @@ bot.action('btn_list_admins', async (ctx: any) => {
 // ==================== مدیریت پیام‌های عادی ====================
 bot.on('message', greeting());
 
-// ==================== پیکربندی و اجرای سرورلس ====================
+// ==================== پیکربندی و اجرای سرورلس با پاسخ فوری و ایمن ====================
 export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
-  await production(req, res, bot);
+  try {
+    if (req.method !== 'POST' || !req.body || !req.body.update_id) {
+      if (res && typeof res.status === 'function') {
+        return res.status(200).send('Bot is running...');
+      }
+      return;
+    }
+
+    if (res && typeof res.status === 'function') {
+      res.status(200).send('OK');
+    }
+
+    await bot.handleUpdate(req.body);
+  } catch (err) {
+    console.error("Vercel Webhook Error:", err);
+  }
 };
 
 ENVIRONMENT !== 'production' && development(bot);
